@@ -1,0 +1,28 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  tidy:
+    cmds:
+      - go mod tidy
+
+  format-check:
+    cmds:
+      - goimports -e -l .
+
+  format:
+    cmds:
+      - goimports -w .
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  build:
+    cmds:
+      - go build -o ./bin/updater .
+
+  run:
+    cmds:
+      - go run ./main.go {{.CLI_ARGS}}
