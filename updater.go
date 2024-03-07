@@ -325,7 +325,7 @@ func (updater *Updater) downloadArchive() error {
 
 	if strings.HasSuffix(strings.ToLower(updater.archiveName), ".tar.gz") {
 		return updater.extractTarball(tempFile)
-	} else if strings.HasPrefix(strings.ToLower(updater.archiveName), ".zip") {
+	} else if strings.HasSuffix(strings.ToLower(updater.archiveName), ".zip") {
 		return updater.extractZip(tempFile)
 	} else {
 		return fmt.Errorf("Error. Only .tar.gz or .zip archives are supported. Got %s", updater.archiveName)
