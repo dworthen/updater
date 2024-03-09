@@ -266,12 +266,12 @@ func (updater *Updater) downloadBinary() error {
 		return err
 	}
 
-	err = os.WriteFile(tempFile, responseBody, 0644)
+	err = os.Rename(binaryPath, tempFile)
 	if err != nil {
 		return err
 	}
 
-	err = os.Rename(tempFile, binaryPath)
+	err = os.WriteFile(binaryPath, responseBody, 0644)
 	if err != nil {
 		return err
 	}
@@ -333,6 +333,7 @@ func (updater *Updater) downloadArchive() error {
 }
 
 func (updater *Updater) extractZip(src string) error {
+	tempDir := os.TempDir()
 	destination := filepath.Dir(src)
 	binaryPath, err := os.Executable()
 	if err != nil {
@@ -356,6 +357,8 @@ func (updater *Updater) extractZip(src string) error {
 
 		if basename == updater.binaryName {
 			filename := uuid.NewString()
+			tempName := uuid.NewString()
+			tempPath := filepath.Join(tempDir, tempName)
 
 			path := filepath.Join(destination, filename)
 
@@ -369,8 +372,16 @@ func (updater *Updater) extractZip(src string) error {
 				if err != nil {
 					return fmt.Errorf("ExtractZip: failed to copy file %w", err)
 				}
-				file.Close()
+				err = file.Close()
+				if err != nil {
+					return err
+				}
 				rc.Close()
+				err = os.Rename(binaryPath, tempPath)
+				if err != nil {
+					return err
+				}
+
 				err = os.Rename(path, binaryPath)
 				if err != nil {
 					return err
@@ -393,6 +404,7 @@ func (updater *Updater) extractZip(src string) error {
 }
 
 func (updater *Updater) extractTarball(src string) error {
+	tempDir := os.TempDir()
 	destination := filepath.Dir(src)
 	binaryPath, err := os.Executable()
 	if err != nil {
@@ -428,6 +440,8 @@ func (updater *Updater) extractTarball(src string) error {
 
 		if basename == updater.binaryName {
 			filename := uuid.NewString()
+			tempName := uuid.NewString()
+			tempPath := filepath.Join(tempDir, tempName)
 
 			path := filepath.Join(destination, filename)
 
@@ -443,6 +457,10 @@ func (updater *Updater) extractTarball(src string) error {
 				err = outFile.Close()
 				if err != nil {
 					return fmt.Errorf("Failed to close file. %w", err)
+				}
+				err = os.Rename(binaryPath, tempPath)
+				if err != nil {
+					return err
 				}
 				err = os.Rename(path, binaryPath)
 				if err != nil {
